@@ -19,11 +19,11 @@ const UserSchema = module.exports = Schema({
   },
   "lastName": {
     "type": "string",
-    "required": true
+    "required": false
   },
   "dateOfBirth": {
     "type": "date",
-    "required": true
+    "required": false
   },
   "password": {
     "type": "string",

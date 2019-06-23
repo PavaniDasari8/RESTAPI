@@ -102,6 +102,28 @@ const signup = (request, response) => {
     });
 }
 
+const validUserName = (request, response) => {
+    Model.find({ 'userName': request.params.userName }, (err, user) => {
+        if (user && user.length != 0)
+            response.json(utill.responseErrorJSON(401, 'error', 'User Name already exists' + user));
+        else if (err)
+            response.json(utill.responseErrorJSON(401, 'error', err));
+        else
+            response.json(utill.responseSuccessJSON(200, 'success', 'User Name does`nt exists'));
+    });
+}
+
+const validEmail = (request, response) => {
+    Model.find({ 'email': request.params.email }, (err, user) => {
+        if (user && user.length != 0)
+            response.json(utill.responseErrorJSON(401, 'error', 'Email already exists' + user));
+        else if (err)
+            response.json(utill.responseErrorJSON(401, 'error', err));
+        else
+            response.json(utill.responseSuccessJSON(200, 'success', 'Email does`nt exists'));
+    });
+}
+
 
 /**
  * 
@@ -135,4 +157,4 @@ const remove = (request, response) => {
     });
 };
 
-module.exports = { get, getbyid, login, signup, put, remove };
+module.exports = { get, getbyid, login, signup, validUserName, validEmail, put, remove };

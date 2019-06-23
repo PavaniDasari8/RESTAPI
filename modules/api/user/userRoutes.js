@@ -4,11 +4,13 @@ let express = require('express');
 
 const router = express.Router();
 let controller = require('./userController.js');
-router.get('/',  controller.get);
-router.get('/:id',  controller.getbyid);
+router.get('/', controller.get);
+router.get('/:id', controller.getbyid);
+router.get('/validate/userName/:userName', controller.validUserName);
+router.get('/validate/email/:email', controller.validEmail);
 router.post('/login', controller.login);
 router.post('/signup', controller.signup);
-router.put('/:id',  controller.put);
-router.delete('/:id',  controller.remove);
+router.put('/:id', controller.put);
+router.delete('/:id', controller.remove);
 
 module.exports = router;
