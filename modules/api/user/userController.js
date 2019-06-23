@@ -36,12 +36,17 @@ const getbyid = (request, response) => {
  *
  */
 const login = (request, response) => {
-    const email = request.body.email;
+    const userName = request.body.userName;
     const password = request.body.password;
-    Model.findOne({ email: email }, (err, user) => {
+    Model.findOne({
+        $or: [
+            { userName: userName },
+            { email: userName }
+        ]
+    }).exec(function (err, user) {
         if (err) { res.json(utill.responseErrorJSON(401, 'error', err)); }
         if (!user) {
-            response.json(utill.responseErrorJSON(401, `Email ${email} not found.`, 'Error'));
+            response.json(utill.responseErrorJSON(401, `User ${userName} not found.`, 'Error'));
         }
         if (user) {
             comparePassword(password, user.password, (err, isMatch) => {
@@ -65,11 +70,11 @@ const login = (request, response) => {
                         }
                     ]);
                 } else {
-                    response.json(utill.responseErrorJSON(401, "Invalid email or password.", 'Error'));
+                    response.json(utill.responseErrorJSON(401, "Invalid password.", 'Error'));
                 }
             });
         }
-    })
+    });
 };
 
 const signup = (request, response) => {

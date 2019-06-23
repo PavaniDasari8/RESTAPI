@@ -15,7 +15,7 @@ const UserSchema = module.exports = Schema({
   },
   "firstName": {
     "type": "string",
-    "required": true
+    "required": false
   },
   "lastName": {
     "type": "string",
