@@ -4,8 +4,6 @@ let Model = require('./userModel.js').model;
 let fillData = require('./userModel.js').fillData;
 let utill = require('../../utill.js');
 const comparePassword = require('./userModel.js').comparePassword;
-const async = require("async");
-const crypto = require("crypto");
 
 /**
   * This Method get the all users
@@ -49,26 +47,10 @@ const login = (request, response) => {
             response.json(utill.responseErrorJSON(401, `User ${userName} not found.`, 'Error'));
         }
         if (user) {
-            comparePassword(password, user.password, (err, isMatch) => {
-                if (err) { response.json(utill.responseErrorJSON(401, 'error', err)); }
+            comparePassword(password, user.password, (error, isMatch) => {
+                if (error) { response.json(utill.responseErrorJSON(401, 'error', error)); }
                 if (isMatch) {
-                    async.waterfall([
-                        function createRandomToken(done) {
-                            crypto.randomBytes(16, (err, buf) => {
-                                const token = buf.toString("hex");
-                                done(err, token);
-                            });
-                        },
-                        function setRandomToken(token, done) {
-                            user.token = token;
-                            Model.findOneAndUpdate({ '_id': user._id }, user, (err, userInfo) => {
-                                if (err) { response.json(utill.responseErrorJSON(401, 'error', err)); }
-                                if (userInfo) {
-                                    response.json(utill.responseSuccessJSON(200, 'success', userInfo));
-                                }
-                            })
-                        }
-                    ]);
+                    response.json(utill.responseSuccessJSON(200, 'success', user));
                 } else {
                     response.json(utill.responseErrorJSON(401, "Invalid password.", 'Error'));
                 }
@@ -77,36 +59,35 @@ const login = (request, response) => {
     });
 };
 
+/**
+ *  This Method is used for Signup
+ *
+ */
 const signup = (request, response) => {
     Model.findOne({ email: request.body.email }, (err, existingstudent) => {
-        if (err) { return next(err); }
+        if (err) {
+            response.json(utill.responseErrorJSON(401, "error", err));
+        }
         if (existingstudent) {
             response.json(utill.responseErrorJSON(401, "User with that email address already exists.", 'Error'));
         }
         else {
-            async.waterfall([
-                function createRandomToken(done) {
-                    crypto.randomBytes(16, (err, buf) => {
-                        const token = buf.toString("hex");
-                        done(err, token);
-                    });
-                },
-                function setRandomToken(token, done) {
-                    request.body.token = [{ token }];
-                    let filledModel = fillData(request.body);
-                    const _model = new Model(filledModel);
-                    _model.save((err, user) => {
-                        if (err) {
-                            response.json(utill.responseErrorJSON(401, 'error', err));
-                        }
-                        response.json(utill.responseSuccessJSON(200, 'success', user));
-                    });
+            let filledModel = fillData(request.body);
+            const _model = new Model(filledModel);
+            _model.save((error, user) => {
+                if (err) {
+                    response.json(utill.responseErrorJSON(401, 'error', error));
                 }
-            ]);
+                response.json(utill.responseSuccessJSON(200, 'success', user));
+            });
         }
     });
 }
 
+/**
+ *  This Method is used for userName validation
+ *
+ */
 const validUserName = (request, response) => {
     Model.find({ 'userName': request.params.userName }, (err, user) => {
         if (user && user.length != 0)
@@ -118,6 +99,10 @@ const validUserName = (request, response) => {
     });
 }
 
+/**
+ *  This Method is used for email validation
+ *
+ */
 const validEmail = (request, response) => {
     Model.find({ 'email': request.params.email }, (err, user) => {
         if (user && user.length != 0)
@@ -151,10 +136,10 @@ const put = (request, response) => {
 };
 /**
  * 
- * This method is used to soft remove user details by ID 
+ * This method is used to remove
  */
 const remove = (request, response) => {
-    Model.findByIdAndRemove(req.params.id, err => {
+    Model.findByIdAndRemove(request.params.id, err => {
         if (err) {
             response.json(utill.responseErrorJSON(401, 'error', err));
         }
